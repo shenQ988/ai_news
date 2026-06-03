@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(uv sync *)",
-      "Bash(kill 89950 89946)"
+      "Bash(kill 89950 89946)",
+      "Bash(uv run *)",
+      "Bash(uv pip *)"
     ]
   }
 }

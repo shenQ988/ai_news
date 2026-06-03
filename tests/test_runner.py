@@ -61,21 +61,46 @@ class TestRunScrapers:
                 assert isinstance(article, Article)
 
 
-@patch("app.runner.RSSScraper")
 class TestMain:
-    def test_main_returns_results(self, mock_scraper_cls):
+    def test_main_scrapes_with_default_hours(self):
         from main import main
-        mock_scraper_cls.return_value.get_articles.return_value = MOCK_ARTICLES
+        with patch("main.setup_db"), \
+             patch("main.run_scrape") as mock_scrape, \
+             patch("sys.argv", ["main.py"]):
+            main()
+        mock_scrape.assert_called_once_with(24)
 
-        results = main(hours=24)
-
-        assert isinstance(results, dict)
-        assert "OpenAI" in results
-
-    def test_main_default_hours(self, mock_scraper_cls):
+    def test_main_scrapes_with_custom_hours(self):
         from main import main
-        mock_scraper_cls.return_value.get_articles.return_value = []
+        with patch("main.setup_db"), \
+             patch("main.run_scrape") as mock_scrape, \
+             patch("sys.argv", ["main.py", "200"]):
+            main()
+        mock_scrape.assert_called_once_with(200)
 
-        main()
+    def test_main_digest_flag_calls_run_digest(self):
+        from main import main
+        with patch("main.setup_db"), \
+             patch("main.run_scrape"), \
+             patch("main.run_digest") as mock_digest, \
+             patch("sys.argv", ["main.py", "--digest"]):
+            main()
+        mock_digest.assert_called_once_with(send_email=False)
 
-        mock_scraper_cls.return_value.get_articles.assert_called_once_with(hours=24)
+    def test_main_digest_only_skips_scraping(self):
+        from main import main
+        with patch("main.setup_db"), \
+             patch("main.run_scrape") as mock_scrape, \
+             patch("main.run_digest"), \
+             patch("sys.argv", ["main.py", "--digest-only"]):
+            main()
+        mock_scrape.assert_not_called()
+
+    def test_main_send_flag_passed_to_run_digest(self):
+        from main import main
+        with patch("main.setup_db"), \
+             patch("main.run_scrape"), \
+             patch("main.run_digest") as mock_digest, \
+             patch("sys.argv", ["main.py", "--digest", "--send"]):
+            main()
+        mock_digest.assert_called_once_with(send_email=True)
