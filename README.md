@@ -8,7 +8,8 @@ A self-hosted weekly newsletter that scrapes AI news, ranks it by your interests
 
 ```
 GitHub Actions (every Monday)
-  → Scrape 16 AI RSS feeds
+  → Aggregates AI news from 16 sources — OpenAI, Anthropic, DeepMind, Meta AI, Mistral, and more — into a personalized daily digest.
+RSS feeds sourced from [Olshansk/rss-feeds](https://github.com/Olshansk/rss-feeds).
   → Embed articles into Supabase (pgvector)
   → SmartRetrieval: rank by interest similarity + recency
   → DigestAgent: generate personalized digest via LLM
@@ -18,9 +19,10 @@ GitHub Actions (every Monday)
 
 ## Subscribe
 
-> **Live at:** `https://your-railway-or-render-url.com`
+> **Live at:** Comming Soon
 
 Visit the link above, enter your email, pick your interests, and you'll receive a digest every Monday.
+<img width="500" height=auto alt="image" src="https://github.com/user-attachments/assets/bc200dae-5f62-4400-ac45-262b55c3457f" />
 
 ---
 
