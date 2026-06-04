@@ -29,7 +29,8 @@ Scrape 16 RSS feeds (OpenAI, Anthropic, DeepMind, Meta AI, Mistral…)
 <img width="500" height=auto alt="image" src="https://github.com/user-attachments/assets/5a8cfc8a-2370-42da-9dd9-56c14edce1f9" />
 
 **Cross-source analysis** — stories that appeared across multiple independent sources are surfaced and synthesized, separating signal from noise.
-<img width="500" height=auto alt="image" src="https://github.com/user-attachments/assets/d0847df2-0394-42d8-a2dc-6e000d2d1019" />
+<img width="500" height=auto alt="image" src="https://github.com/user-attachments/assets/59d76825-b71b-4fe7-b9f2-4c240590747e" />
+
 
 **Action items** — concrete takeaways: tools to try, papers to read, trends to watch. Turns news into next steps.
 <img width="500" height=auto alt="image" src="https://github.com/user-attachments/assets/e0174059-f09b-499a-af56-54632143a732" />
