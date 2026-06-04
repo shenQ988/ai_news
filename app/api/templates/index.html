@@ -3,367 +3,449 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI News Digest</title>
+  <title>AI News Aggregator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            navy: { DEFAULT: '#1a1a2e', light: '#16213e', dark: '#0f0c29' },
+            accent: { DEFAULT: '#e94560', light: '#ff6b8a' },
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f5f5f5;
-      color: #1a1a1a;
-      min-height: 100vh;
-    }
-
-    header {
-      background: #1a1a2e;
-      color: #fff;
-      text-align: center;
-      padding: 48px 24px 40px;
-    }
-    header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
-    header p  { margin-top: 10px; color: #a8b2d8; font-size: 15px; }
-
-    .page { max-width: 600px; margin: 0 auto; padding: 40px 24px 64px; }
-
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 32px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-
-    .field + .field { margin-top: 20px; }
-
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    input[type="text"], input[type="email"] {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      font-size: 15px;
-      color: #1a1a1a;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    input:focus { border-color: #1a1a2e; }
-
-    /* ── Interests ── */
-    .section-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin: 28px 0 8px;
-    }
-    .category-label {
-      font-size: 12px;
-      color: #999;
-      margin: 16px 0 8px;
-      font-weight: 500;
-    }
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-
-    .chip {
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      cursor: pointer;
-      border: 1.5px solid #d0d0d0;
-      color: #444;
-      background: #fff;
-      transition: all 0.15s;
-      user-select: none;
-    }
-    .chip:hover  { border-color: #1a1a2e; color: #1a1a2e; }
-    .chip.active { background: #1a1a2e; border-color: #1a1a2e; color: #fff; }
-
-    .custom-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-    }
-    .custom-row input {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      font-size: 13px;
-      outline: none;
-    }
-    .custom-row input:focus { border-color: #1a1a2e; }
-    .custom-row button {
-      padding: 8px 16px;
-      background: #f0f0f0;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      font-size: 13px;
-      cursor: pointer;
-      color: #444;
-    }
-    .custom-row button:hover { background: #e4e4e4; }
-
-    .counter {
-      font-size: 12px;
-      color: #999;
-      margin-top: 10px;
-    }
-    .counter.warn { color: #e94560; }
-
-    /* ── Frequency ── */
-    .freq-toggle {
-      display: flex;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    .freq-toggle label {
-      flex: 1;
-      text-align: center;
-      padding: 10px;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      text-transform: none;
-      letter-spacing: 0;
-      color: #555;
-      transition: all 0.15s;
-    }
-    .freq-toggle input[type="radio"] { display: none; }
-    .freq-toggle input:checked + label {
-      background: #1a1a2e;
-      border-color: #1a1a2e;
-      color: #fff;
-    }
-
-    /* ── Submit ── */
-    .btn-submit {
-      width: 100%;
-      margin-top: 28px;
-      padding: 14px;
-      background: #e94560;
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .btn-submit:hover    { background: #d03550; }
-    .btn-submit:disabled { background: #bbb; cursor: not-allowed; }
-
-    /* ── Success ── */
-    .success {
-      display: none;
-      text-align: center;
-      padding: 48px 32px;
-    }
-    .success .icon { font-size: 48px; margin-bottom: 16px; }
-    .success h2 { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
-    .success p  { color: #666; font-size: 15px; }
-
-    .error-msg {
-      display: none;
-      margin-top: 12px;
-      padding: 10px 14px;
-      background: #fff0f2;
-      border: 1px solid #fcc;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #c00;
-    }
-
-    @media (max-width: 480px) {
-      header { padding: 36px 20px 32px; }
-      .card  { padding: 24px; }
-    }
+    body { background: #0f0c29; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .chip { transition: all 0.15s ease; }
+    .chip:hover { transform: translateY(-1px); }
+    .nav-tab { transition: all 0.2s; border-bottom: 2px solid transparent; }
+    .nav-tab.active { border-bottom-color: #e94560; color: #e94560; }
+    .card { background: #16213e; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; }
+    .input { background: #1a1a2e; border: 1px solid rgba(255,255,255,0.12); color: #e2e8f0; border-radius: 8px; padding: 10px 14px; width: 100%; outline: none; transition: border-color 0.2s; }
+    .input:focus { border-color: #e94560; }
+    .btn-primary { background: #e94560; color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; border: none; }
+    .btn-primary:hover { background: #ff6b8a; }
+    .btn-primary:disabled { background: #555; cursor: not-allowed; }
+    .btn-ghost { background: transparent; color: #a8b2d8; padding: 8px 16px; border-radius: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.12); transition: all 0.2s; }
+    .btn-ghost:hover { background: rgba(255,255,255,0.05); color: white; }
+    .source-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: rgba(233,69,96,0.15); color: #e94560; border: 1px solid rgba(233,69,96,0.3); }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0f0c29; } ::-webkit-scrollbar-thumb { background: #302b63; border-radius: 3px; }
   </style>
 </head>
-<body>
+<body class="min-h-screen">
+  <div id="root"></div>
 
-<header>
-  <h1>🤖 AI News Digest</h1>
-  <p>Get a personalized AI news briefing delivered to your inbox — curated for you.</p>
-</header>
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
 
-<div class="page">
-  <div class="card">
+    const API = {
+      getProfile: (email) => fetch(`/api/profile/${encodeURIComponent(email)}`).then(r => r.ok ? r.json() : null),
+      saveProfile: (data) => fetch('/api/profile', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) }).then(r => r.json()),
+      updateInterests: (email, interests) => fetch(`/api/profile/${encodeURIComponent(email)}/interests`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ interests }) }).then(r => r.json()),
+      setActive: (email, is_active) => fetch(`/api/profile/${encodeURIComponent(email)}/active?is_active=${is_active}`, { method: 'PATCH' }).then(r => r.json()),
+      getSuggestions: () => fetch('/api/interests/suggestions').then(r => r.json()),
+      getRecent: (hours=24) => fetch(`/api/articles/recent?hours=${hours}`).then(r => r.json()),
+      search: (q) => fetch(`/api/articles/search?q=${encodeURIComponent(q)}`).then(r => r.json()),
+      previewDigest: (email) => `/api/digest/preview/${encodeURIComponent(email)}`,
+      sendDigest: (email) => fetch(`/api/digest/send/${encodeURIComponent(email)}`, { method: 'POST' }).then(r => r.json()),
+    };
 
-    <!-- Form -->
-    <form id="form">
-      <div class="field">
-        <label for="email">Email *</label>
-        <input id="email" type="email" placeholder="Enter your email" required />
-      </div>
-
-      <div class="field">
-        <label for="name">Name</label>
-        <input id="name" type="text" placeholder="Your name (optional)" />
-      </div>
-
-      <!-- Interests -->
-      <p class="section-title">Your Interests * <span style="font-weight:400;text-transform:none;letter-spacing:0">(pick at least 2)</span></p>
-
-      <p class="category-label">AI Research</p>
-      <div class="chips">
-        <span class="chip" data-value="Large language models">Large language models</span>
-        <span class="chip" data-value="AI safety">AI safety</span>
-        <span class="chip" data-value="Multimodal AI">Multimodal AI</span>
-        <span class="chip" data-value="AI benchmarks">AI benchmarks</span>
-      </div>
-
-      <p class="category-label">Products & Tools</p>
-      <div class="chips">
-        <span class="chip" data-value="AI coding assistants">AI coding assistants</span>
-        <span class="chip" data-value="AI agents">AI agents</span>
-        <span class="chip" data-value="AI search and RAG">AI search and RAG</span>
-        <span class="chip" data-value="AI infrastructure">AI infrastructure</span>
-      </div>
-
-      <p class="category-label">Industry</p>
-      <div class="chips">
-        <span class="chip" data-value="Startup funding">Startup funding</span>
-        <span class="chip" data-value="AI regulation">AI regulation</span>
-        <span class="chip" data-value="Enterprise AI">Enterprise AI</span>
-        <span class="chip" data-value="Open source AI">Open source AI</span>
-        <span class="chip" data-value="AI hardware">AI hardware</span>
-      </div>
-
-      <div class="chips" id="custom-chips" style="margin-top:8px"></div>
-      <div class="custom-row">
-        <input id="custom-input" type="text" placeholder="Add a custom interest..." maxlength="60" />
-        <button type="button" onclick="addCustom()">Add</button>
-      </div>
-      <p class="counter" id="counter">0 selected</p>
-
-      <!-- Frequency -->
-      <p class="section-title" style="margin-top:28px">Digest Frequency</p>
-      <div class="freq-toggle">
-        <input type="radio" name="freq" id="daily" value="daily" checked />
-        <label for="daily">📅 Daily</label>
-        <input type="radio" name="freq" id="weekly" value="weekly" />
-        <label for="weekly">📆 Weekly</label>
-      </div>
-
-      <div class="error-msg" id="error"></div>
-      <button class="btn-submit" type="submit" id="submit-btn">Subscribe →</button>
-    </form>
-
-    <!-- Success -->
-    <div class="success" id="success">
-      <div class="icon">🎉</div>
-      <h2>You're in!</h2>
-      <p>Your first digest arrives tomorrow. We'll send it to <strong id="success-email"></strong>.</p>
-    </div>
-
-  </div>
-</div>
-
-<script>
-  const selected = new Set();
-
-  // Chip toggle
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const val = chip.dataset.value;
-      if (selected.has(val)) {
-        selected.delete(val);
-        chip.classList.remove('active');
-      } else if (selected.size < 10) {
-        selected.add(val);
-        chip.classList.add('active');
-      }
-      updateCounter();
-    });
-  });
-
-  function addCustom() {
-    const input = document.getElementById('custom-input');
-    const val = input.value.trim();
-    if (!val || selected.has(val) || selected.size >= 10) return;
-
-    selected.add(val);
-    input.value = '';
-
-    const chip = document.createElement('span');
-    chip.className = 'chip active';
-    chip.dataset.value = val;
-    chip.textContent = val + ' ✕';
-    chip.addEventListener('click', () => {
-      selected.delete(val);
-      chip.remove();
-      updateCounter();
-    });
-    document.getElementById('custom-chips').appendChild(chip);
-    updateCounter();
-  }
-
-  document.getElementById('custom-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); addCustom(); }
-  });
-
-  function updateCounter() {
-    const el = document.getElementById('counter');
-    el.textContent = `${selected.size} selected`;
-    el.className = 'counter' + (selected.size >= 10 ? ' warn' : '');
-  }
-
-  // Form submit
-  document.getElementById('form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('submit-btn');
-    const errorEl = document.getElementById('error');
-    errorEl.style.display = 'none';
-
-    const email = document.getElementById('email').value.trim();
-    const name = document.getElementById('name').value.trim();
-    const frequency = document.querySelector('input[name="freq"]:checked').value;
-    const interests = [...selected];
-
-    if (interests.length < 2) {
-      errorEl.textContent = 'Please select at least 2 interests.';
-      errorEl.style.display = 'block';
-      return;
+    // ── Toast ────────────────────────────────────────────────────────────────
+    function Toast({ message, type, onClose }) {
+      useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, []);
+      const colors = type === 'error' ? 'bg-red-900 border-red-700' : 'bg-green-900 border-green-700';
+      return (
+        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-lg border text-sm font-medium shadow-xl ${colors}`}>
+          {message}
+        </div>
+      );
     }
 
-    btn.disabled = true;
-    btn.textContent = 'Subscribing...';
-
-    try {
-      const res = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, interests, frequency }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.detail || 'Something went wrong');
-      }
-
-      document.getElementById('form').style.display = 'none';
-      document.getElementById('success-email').textContent = email;
-      document.getElementById('success').style.display = 'block';
-    } catch (err) {
-      errorEl.textContent = err.message;
-      errorEl.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Subscribe →';
+    // ── Nav ──────────────────────────────────────────────────────────────────
+    function Nav({ tab, setTab, hasProfile }) {
+      const tabs = [
+        { id: 'profile', label: '👤 Profile' },
+        { id: 'interests', label: '🎯 Interests', disabled: !hasProfile },
+        { id: 'articles', label: '📰 Articles' },
+        { id: 'digest', label: '📧 Digest', disabled: !hasProfile },
+        { id: 'settings', label: '⚙️ Settings', disabled: !hasProfile },
+      ];
+      return (
+        <nav className="flex gap-1 border-b border-white/10 mb-8 overflow-x-auto">
+          {tabs.map(t => (
+            <button
+              key={t.id}
+              onClick={() => !t.disabled && setTab(t.id)}
+              className={`nav-tab px-4 py-3 text-sm font-medium whitespace-nowrap ${tab === t.id ? 'active' : 'text-slate-400'} ${t.disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer hover:text-white'}`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
+      );
     }
-  });
-</script>
 
+    // ── Profile Tab ──────────────────────────────────────────────────────────
+    function ProfileTab({ profile, onSaved, showToast }) {
+      const [form, setForm] = useState({ name: profile?.name || '', email: profile?.email || '', role: profile?.role || '', digest_frequency: profile?.digest_frequency || 'daily' });
+      const [saving, setSaving] = useState(false);
+
+      const save = async () => {
+        if (!form.email.includes('@')) return showToast('Enter a valid email', 'error');
+        setSaving(true);
+        try {
+          const existing = await API.getProfile(form.email);
+          const data = { ...form, interests: existing?.interests || [] };
+          const saved = await API.saveProfile(data);
+          onSaved(saved);
+          showToast('Profile saved!', 'success');
+        } catch (e) {
+          showToast('Failed to save profile', 'error');
+        } finally {
+          setSaving(false);
+        }
+      };
+
+      return (
+        <div className="max-w-lg mx-auto">
+          <div className="card p-8">
+            <h2 className="text-xl font-bold mb-6 text-white">Your Profile</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs text-slate-400 mb-1 uppercase tracking-wide">Name</label>
+                <input className="input" placeholder="e.g. Qing Shen" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-400 mb-1 uppercase tracking-wide">Email *</label>
+                <input className="input" type="email" placeholder="you@example.com" value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+                <p className="text-xs text-slate-500 mt-1">Digests will be sent here</p>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-400 mb-1 uppercase tracking-wide">Role</label>
+                <input className="input" placeholder="e.g. Software engineer building AI products" value={form.role} onChange={e => setForm({...form, role: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-400 mb-1 uppercase tracking-wide">Digest Frequency</label>
+                <select className="input" value={form.digest_frequency} onChange={e => setForm({...form, digest_frequency: e.target.value})}>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                </select>
+              </div>
+              <button className="btn-primary w-full mt-2" onClick={save} disabled={saving}>
+                {saving ? 'Saving...' : 'Save Profile →'}
+              </button>
+            </div>
+          </div>
+          {profile && (
+            <div className="mt-4 text-center text-xs text-slate-500">
+              Last updated: {new Date(profile.updated_at).toLocaleDateString()}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ── Interests Tab ─────────────────────────────────────────────────────────
+    function InterestsTab({ profile, onUpdated, showToast }) {
+      const [suggestions, setSuggestions] = useState([]);
+      const [selected, setSelected] = useState(profile?.interests || []);
+      const [custom, setCustom] = useState('');
+      const [saving, setSaving] = useState(false);
+
+      useEffect(() => { API.getSuggestions().then(setSuggestions); }, []);
+
+      const toggle = (interest) => {
+        setSelected(prev =>
+          prev.includes(interest)
+            ? prev.filter(i => i !== interest)
+            : prev.length < 10 ? [...prev, interest] : prev
+        );
+      };
+
+      const addCustom = () => {
+        const trimmed = custom.trim();
+        if (!trimmed || selected.includes(trimmed) || selected.length >= 10) return;
+        setSelected(prev => [...prev, trimmed]);
+        setCustom('');
+      };
+
+      const save = async () => {
+        if (selected.length < 2) return showToast('Select at least 2 interests', 'error');
+        setSaving(true);
+        try {
+          const updated = await API.updateInterests(profile.email, selected);
+          onUpdated(updated);
+          showToast('Interests saved!', 'success');
+        } catch (e) {
+          showToast('Failed to save interests', 'error');
+        } finally {
+          setSaving(false);
+        }
+      };
+
+      return (
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-white">Your Interests</h2>
+              <p className="text-sm text-slate-400 mt-1">Select 2–10 topics that shape your digest</p>
+            </div>
+            <div className="text-sm text-slate-400">{selected.length}/10 selected</div>
+          </div>
+
+          {selected.length > 0 && (
+            <div className="card p-4 mb-6">
+              <p className="text-xs text-slate-400 uppercase tracking-wide mb-3">Selected</p>
+              <div className="flex flex-wrap gap-2">
+                {selected.map(i => (
+                  <button key={i} onClick={() => toggle(i)} className="chip px-3 py-1.5 rounded-full text-sm bg-accent/20 text-accent border border-accent/40 hover:bg-red-900/40">
+                    {i} ✕
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-5 mb-6">
+            {suggestions.map(group => (
+              <div key={group.category} className="card p-5">
+                <p className="text-xs text-slate-400 uppercase tracking-wide mb-3">{group.category}</p>
+                <div className="flex flex-wrap gap-2">
+                  {group.interests.map(interest => {
+                    const active = selected.includes(interest);
+                    return (
+                      <button
+                        key={interest}
+                        onClick={() => toggle(interest)}
+                        className={`chip px-3 py-1.5 rounded-full text-sm border transition-all ${active ? 'bg-accent/20 text-accent border-accent/40' : 'bg-white/5 text-slate-300 border-white/10 hover:border-white/30 hover:text-white'} ${!active && selected.length >= 10 ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      >
+                        {interest}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="card p-5 mb-6">
+            <p className="text-xs text-slate-400 uppercase tracking-wide mb-3">Custom Interest</p>
+            <div className="flex gap-2">
+              <input className="input flex-1" placeholder="e.g. AI in healthcare" value={custom} onChange={e => setCustom(e.target.value)} onKeyDown={e => e.key === 'Enter' && addCustom()} />
+              <button className="btn-ghost" onClick={addCustom}>Add</button>
+            </div>
+          </div>
+
+          <button className="btn-primary w-full" onClick={save} disabled={saving || selected.length < 2}>
+            {saving ? 'Saving...' : `Save ${selected.length} Interests →`}
+          </button>
+        </div>
+      );
+    }
+
+    // ── Articles Tab ─────────────────────────────────────────────────────────
+    function ArticlesTab({ showToast }) {
+      const [articles, setArticles] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [hours, setHours] = useState(24);
+      const [query, setQuery] = useState('');
+      const [searching, setSearching] = useState(false);
+
+      const load = useCallback(async () => {
+        setLoading(true);
+        try { setArticles(await API.getRecent(hours)); } catch { showToast('Failed to load articles', 'error'); } finally { setLoading(false); }
+      }, [hours]);
+
+      useEffect(() => { load(); }, [load]);
+
+      const search = async () => {
+        if (!query.trim()) return load();
+        setSearching(true);
+        try { setArticles(await API.search(query)); } catch { showToast('Search failed', 'error'); } finally { setSearching(false); }
+      };
+
+      return (
+        <div>
+          <div className="flex gap-3 mb-6">
+            <input className="input flex-1" placeholder="Search articles..." value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && search()} />
+            <button className="btn-primary" onClick={search} disabled={searching}>{searching ? '...' : 'Search'}</button>
+            <select className="input w-32" value={hours} onChange={e => { setHours(+e.target.value); setQuery(''); }}>
+              <option value={24}>24h</option>
+              <option value={48}>48h</option>
+              <option value={168}>7 days</option>
+            </select>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-16 text-slate-400">Loading articles...</div>
+          ) : articles.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-slate-400 mb-2">No articles found</p>
+              <p className="text-sm text-slate-500">Run <code className="bg-white/5 px-2 py-0.5 rounded">python main.py</code> to scrape</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {articles.map((a, i) => (
+                <a key={i} href={a.url} target="_blank" rel="noopener" className="card p-4 flex gap-4 hover:border-white/20 transition-colors block no-underline">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="source-badge">{a.source}</span>
+                      <span className="text-xs text-slate-500">{new Date(a.published_at).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-sm font-medium text-white truncate">{a.title}</p>
+                    {a.description && <p className="text-xs text-slate-400 mt-1 line-clamp-2">{a.description}</p>}
+                  </div>
+                  <span className="text-slate-600 text-lg self-center">↗</span>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ── Digest Tab ────────────────────────────────────────────────────────────
+    function DigestTab({ profile, showToast }) {
+      const [sending, setSending] = useState(false);
+      const previewUrl = API.previewDigest(profile.email);
+
+      const send = async () => {
+        setSending(true);
+        try {
+          const res = await API.sendDigest(profile.email);
+          showToast(res.sent ? `Digest sent to ${profile.email}!` : 'Send failed — check logs', res.sent ? 'success' : 'error');
+        } catch { showToast('Failed to send', 'error'); } finally { setSending(false); }
+      };
+
+      return (
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-white">Digest Preview</h2>
+              <p className="text-sm text-slate-400 mt-1">Based on your {profile.interests.length} selected interests</p>
+            </div>
+            <button className="btn-primary" onClick={send} disabled={sending}>
+              {sending ? 'Sending...' : '📧 Send to ' + profile.email}
+            </button>
+          </div>
+          <div className="card overflow-hidden" style={{height: '70vh'}}>
+            <iframe src={previewUrl} className="w-full h-full border-0" title="Digest Preview" />
+          </div>
+        </div>
+      );
+    }
+
+    // ── Settings Tab ─────────────────────────────────────────────────────────
+    function SettingsTab({ profile, onUpdated, showToast }) {
+      const [frequency, setFrequency] = useState(profile.digest_frequency);
+      const [active, setActive] = useState(profile.is_active);
+      const [saving, setSaving] = useState(false);
+
+      const save = async () => {
+        setSaving(true);
+        try {
+          await API.saveProfile({ ...profile, digest_frequency: frequency });
+          await API.setActive(profile.email, active);
+          onUpdated({ ...profile, digest_frequency: frequency, is_active: active });
+          showToast('Settings saved!', 'success');
+        } catch { showToast('Failed to save', 'error'); } finally { setSaving(false); }
+      };
+
+      return (
+        <div className="max-w-lg mx-auto">
+          <div className="card p-8 space-y-6">
+            <h2 className="text-xl font-bold text-white">Settings</h2>
+
+            <div>
+              <label className="block text-xs text-slate-400 mb-2 uppercase tracking-wide">Digest Frequency</label>
+              <div className="flex gap-3">
+                {['daily', 'weekly'].map(f => (
+                  <button key={f} onClick={() => setFrequency(f)} className={`flex-1 py-3 rounded-lg border text-sm font-medium capitalize transition-all ${frequency === f ? 'bg-accent/20 border-accent text-accent' : 'bg-white/5 border-white/10 text-slate-400 hover:border-white/30'}`}>
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white">Pause Digest</p>
+                <p className="text-xs text-slate-400">Temporarily stop receiving emails</p>
+              </div>
+              <button onClick={() => setActive(!active)} className={`w-12 h-6 rounded-full transition-colors relative ${active ? 'bg-accent' : 'bg-slate-600'}`}>
+                <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${active ? 'translate-x-6' : 'translate-x-0.5'}`} />
+              </button>
+            </div>
+
+            <div className="pt-2 border-t border-white/10 text-xs text-slate-500 space-y-1">
+              <p>Email: {profile.email}</p>
+              <p>Member since: {new Date(profile.created_at).toLocaleDateString()}</p>
+            </div>
+
+            <button className="btn-primary w-full" onClick={save} disabled={saving}>
+              {saving ? 'Saving...' : 'Save Settings'}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ── App Root ─────────────────────────────────────────────────────────────
+    function App() {
+      const [tab, setTab] = useState('profile');
+      const [profile, setProfile] = useState(null);
+      const [toast, setToast] = useState(null);
+
+      const showToast = (message, type = 'success') => setToast({ message, type });
+
+      const handleProfileSaved = (p) => {
+        setProfile(p);
+        if (p.interests?.length < 2) setTab('interests');
+        else setTab('articles');
+      };
+
+      return (
+        <div className="min-h-screen">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-navy-dark via-navy to-navy-light px-6 py-5 border-b border-white/10">
+            <div className="max-w-4xl mx-auto flex items-center justify-between">
+              <div>
+                <h1 className="text-xl font-bold text-white">🤖 AI News Aggregator</h1>
+                <p className="text-xs text-slate-400 mt-0.5">Personalized AI news, delivered to your inbox</p>
+              </div>
+              {profile && (
+                <div className="text-right">
+                  <p className="text-sm font-medium text-white">{profile.name || profile.email}</p>
+                  <p className="text-xs text-slate-400">{profile.interests?.length || 0} interests</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Main */}
+          <div className="max-w-4xl mx-auto px-6 py-8">
+            <Nav tab={tab} setTab={setTab} hasProfile={!!profile} />
+
+            {tab === 'profile' && <ProfileTab profile={profile} onSaved={handleProfileSaved} showToast={showToast} />}
+            {tab === 'interests' && profile && <InterestsTab profile={profile} onUpdated={setProfile} showToast={showToast} />}
+            {tab === 'articles' && <ArticlesTab showToast={showToast} />}
+            {tab === 'digest' && profile && <DigestTab profile={profile} showToast={showToast} />}
+            {tab === 'settings' && profile && <SettingsTab profile={profile} onUpdated={setProfile} showToast={showToast} />}
+          </div>
+
+          {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
 </body>
 </html>

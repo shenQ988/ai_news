@@ -11,6 +11,11 @@ Usage:
   python main.py --digest-all       # generate + send personalized digest to all active users
   python main.py --digest --trace   # print fact-checker reasoning trace
   python main.py --digest --no-check # skip fact-checking (faster, for testing)
+
+  # LangGraph orchestration
+  python main.py --use-graph        # full pipeline via LangGraph state machine
+  python main.py --use-graph --send # LangGraph pipeline + send email
+  python main.py --visualize-graph  # print Mermaid diagram and save to docs/
 """
 
 import argparse
@@ -18,6 +23,7 @@ import logging
 import os
 
 from dotenv import load_dotenv
+from app.config import config
 
 
 def setup_db():
@@ -188,10 +194,49 @@ def main():
                         help="Run RAGAS evaluation after digest generation")
     parser.add_argument("--metric", choices=["faithfulness", "answer_relevancy", "context_precision"],
                         help="Run a single RAGAS metric (avoids rate limits)")
+    parser.add_argument("--use-graph", action="store_true",
+                        help="Run the full pipeline via the LangGraph state machine")
+    parser.add_argument("--visualize-graph", action="store_true",
+                        help="Print Mermaid diagram of the pipeline and save to docs/")
 
     args = parser.parse_args()
 
+    if args.visualize_graph:
+        from app.orchestration.graph import visualize_graph
+        visualize_graph()
+        return
+
     setup_db()
+
+    if args.use_graph:
+        from app.orchestration.graph import build_pipeline_graph
+
+        print("\n=== Running LangGraph Pipeline ===")
+        graph = build_pipeline_graph()
+
+        initial_state = {
+            "hours": args.hours,
+            "user_profile": {
+                "name": config.user_name,
+                "role": config.user_role,
+                "interests": config.user_interests,
+            },
+            "should_send_email": args.send,
+            "revision_count": 0,
+            "hallucination_rate": 0.0,
+            "email_sent": False,
+        }
+
+        final_state = graph.invoke(initial_state)
+
+        print(f"\n=== Pipeline Complete ===")
+        print(f"  Articles scraped: {final_state.get('scrape_stats', {}).get('total', 0)}")
+        print(f"  Articles retrieved: {len(final_state.get('retrieved_articles', []))}")
+        print(f"  Hallucination rate: {final_state.get('hallucination_rate', 0.0):.2%}")
+        print(f"  Email sent: {final_state.get('email_sent', False)}")
+        if final_state.get("error"):
+            print(f"  Errors: {final_state['error']}")
+        return
 
     if args.digest_all:
         if not args.digest_only:

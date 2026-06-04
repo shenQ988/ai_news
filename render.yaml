@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ai-news-agg
+    runtime: python
+    buildCommand: pip install uv && uv sync
+    startCommand: uv run uvicorn app.api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: HUGGINGFACE_API_KEY
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_TO
+        sync: false

@@ -1,0 +1,50 @@
+name: Daily AI News Digest
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # 07:00 UTC every day
+  workflow_dispatch:       # allow manual runs from the Actions tab
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DATABASE_URL:        ${{ secrets.DATABASE_URL }}
+      HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
+      SMTP_HOST:           ${{ secrets.SMTP_HOST }}
+      SMTP_PORT:           ${{ secrets.SMTP_PORT }}
+      SMTP_USER:           ${{ secrets.SMTP_USER }}
+      SMTP_PASSWORD:       ${{ secrets.SMTP_PASSWORD }}
+      EMAIL_FROM:          ${{ secrets.EMAIL_FROM }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Scrape + embed articles
+        run: uv run python main.py 25
+        # 25 h covers the full day plus a small overlap buffer
+
+      - name: Generate and send digests to all active subscribers
+        run: uv run python main.py --digest-all --send
+
+      - name: Upload digest preview on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: digest-preview
+          path: digest_preview.html
+          if-no-files-found: ignore
