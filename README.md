@@ -1,105 +1,52 @@
 # AI News Digest
 
-A self-hosted weekly newsletter that scrapes AI news, ranks it by your interests, fact-checks the summary with an LLM, and emails it to subscribers every Monday — fully automated via GitHub Actions.
+A fully automated, personalized AI newsletter — built end-to-end with a RAG pipeline, agentic fact-checking, and LangGraph orchestration. Scrapes 16 AI news sources every week, ranks articles by each subscriber's interests, generates a digest with an LLM, and delivers it by email. No manual steps.
+
+**Live:** coming soon &nbsp;·&nbsp; **Stack:** Python · FastAPI · PostgreSQL · pgvector · LangGraph · GitHub Actions
 
 ---
 
-## How it works
+## What it does
+
+<img width="500" alt="Landing page" src="https://github.com/user-attachments/assets/bc200dae-5f62-4400-ac45-262b55c3457f" />
+
+Subscribers pick their interests on the landing page. Every Monday, the pipeline runs automatically:
 
 ```
-GitHub Actions (every Monday)
-  → Aggregates AI news from 16 sources — OpenAI, Anthropic, DeepMind, Meta AI, Mistral, and more — into a personalized daily digest.
-RSS feeds sourced from [Olshansk/rss-feeds](https://github.com/Olshansk/rss-feeds).
-  → Embed articles into Supabase (pgvector)
-  → SmartRetrieval: rank by interest similarity + recency
-  → DigestAgent: generate personalized digest via LLM
-  → FactChecker: verify claims against source articles
-  → EmailService: send to all active subscribers
+Scrape 16 RSS feeds (OpenAI, Anthropic, DeepMind, Meta AI, Mistral…)
+  → Embed articles with sentence-transformers → store in Supabase pgvector
+  → SmartRetrieval: semantic search + recency + source diversity scoring
+  → DigestAgent: generate personalized digest via Qwen 2.5 72B (HuggingFace)
+  → FactChecker: ReAct agent verifies claims against source articles
+  → Email delivered to all active subscribers via Gmail SMTP
 ```
 
-## Subscribe
+---
 
-> **Live at:** Comming Soon
+## Technical highlights
 
-Visit the link above, enter your email, pick your interests, and you'll receive a digest every Monday.
-<img width="500" height=auto alt="image" src="https://github.com/user-attachments/assets/bc200dae-5f62-4400-ac45-262b55c3457f" />
+**RAG pipeline** — articles are embedded with `sentence-transformers/all-MiniLM-L6-v2` and stored in Supabase with pgvector. Retrieval uses cosine similarity weighted with recency and source diversity to avoid echo chambers.
+
+**Agentic fact-checking** — a ReAct agent extracts claims from the generated digest, verifies each against the source articles, and rewrites unsupported sections. Reduces hallucination rate before delivery.
+
+**LangGraph orchestration** — the pipeline is a compiled state machine with conditional retry loops: if the fact-checker flags too many unsupported claims, the digest is regenerated before sending.
+
+**Fully serverless** — GitHub Actions runs the weekly cron. Supabase hosts the database. No always-on server required for the core pipeline.
 
 ---
 
 ## Stack
 
-| Layer | Service |
+| | |
 |---|---|
-| Automation | GitHub Actions (free) |
-| Database | Supabase PostgreSQL + pgvector (free) |
-| Backend | Comming Soon! Currently working locally |
-| LLM | Qwen 2.5 72B via HuggingFace Inference API |
-| Email | Gmail SMTP |
-
----
-
-## Local setup
-
-**Prerequisites:** Python 3.11+, [uv](https://docs.astral.sh/uv/), a Supabase project, a HuggingFace API key, Gmail App Password.
-
-```bash
-git clone https://github.com/YOUR_USERNAME/ai_news.git
-cd ai_news
-uv sync
-cp .env.example .env   # fill in your credentials
-```
-
-Create tables:
-```bash
-uv run python -c "
-from dotenv import load_dotenv; load_dotenv()
-import os
-from sqlalchemy import create_engine, text
-from app.database.models import Base
-engine = create_engine(os.getenv('DATABASE_URL'))
-with engine.connect() as conn:
-    conn.execute(text('CREATE EXTENSION IF NOT EXISTS vector'))
-    conn.commit()
-Base.metadata.create_all(engine)
-"
-```
-
-Run the pipeline manually:
-```bash
-uv run python main.py --digest --send   # scrape + digest + email
-uv run python main.py --use-graph       # same via LangGraph orchestration
-```
-
-Start the web UI locally:
-```bash
-uv run uvicorn app.api.main:app --reload
-# open http://localhost:8000
-```
-
----
-
-## Deploy the web UI 
-Comming soon!
-
-
-
----
-
-## GitHub Actions secrets
-
-Add these in: **Repo → Settings → Secrets and variables → Actions**
-
-| Secret | Description |
-|---|---|
-| `DATABASE_URL` | Supabase connection string (Transaction pooler, port 6543) |
-| `HUGGINGFACE_API_KEY` | From huggingface.co/settings/tokens |
-| `SMTP_HOST` | `smtp.gmail.com` |
-| `SMTP_PORT` | `587` |
-| `SMTP_USER` | Your Gmail address |
-| `SMTP_PASSWORD` | Gmail App Password (16 chars) |
-| `EMAIL_FROM` | Your Gmail address |
-
-Trigger a test run anytime: **Actions → Weekly AI News Digest → Run workflow**
+| **Language** | Python 3.11 |
+| **Backend** | FastAPI |
+| **Database** | Supabase (PostgreSQL + pgvector) |
+| **Orchestration** | LangGraph |
+| **LLM** | Qwen 2.5 72B via HuggingFace Inference API |
+| **Embeddings** | sentence-transformers/all-MiniLM-L6-v2 |
+| **Automation** | GitHub Actions (weekly cron) |
+| **Email** | Gmail SMTP |
 
 ---
 
@@ -107,13 +54,27 @@ Trigger a test run anytime: **Actions → Weekly AI News Digest → Run workflow
 
 ```
 app/
-├── scrapers/        # RSS feed scraping (20+ AI sources)
-├── agent/           # SmartRetrieval, DigestAgent, FactChecker
+├── scrapers/        # RSS feed scraping + content extraction
+├── agent/           # SmartRetrieval, DigestAgent, FactChecker (ReAct)
 ├── services/        # EmailService
-├── database/        # SQLAlchemy models + pgvector repositories
-├── orchestration/   # LangGraph state machine
-└── api/             # FastAPI backend + landing page UI
+├── database/        # SQLAlchemy ORM + pgvector repository
+├── orchestration/   # LangGraph state machine + nodes
+└── api/             # FastAPI backend + subscription landing page
 .github/
 └── workflows/
-    └── weekly_digest.yml   # Monday 07:00 UTC cron
+    └── weekly_digest.yml   # Monday 07:00 UTC
 ```
+
+---
+
+## Local setup
+
+```bash
+git clone https://github.com/shenQ988/ai_news.git
+cd ai_news
+uv sync
+cp .env.example .env   # add your API keys
+uv run uvicorn app.api.main:app --reload   # http://localhost:8000
+```
+
+See `.env.example` for required environment variables.
