@@ -1,8 +1,8 @@
-name: Daily AI News Digest
+name: Weekly AI News Digest
 
 on:
   schedule:
-    - cron: '0 7 * * *'   # 07:00 UTC every day
+    - cron: '0 7 * * 1'   # 07:00 UTC every Monday
   workflow_dispatch:       # allow manual runs from the Actions tab
 
 jobs:
