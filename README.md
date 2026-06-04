@@ -25,15 +25,24 @@ Scrape 16 RSS feeds (OpenAI, Anthropic, DeepMind, Meta AI, Mistral…)
 
 ## What's in each digest
 
-**Highlights** — the week's most important AI developments, ranked and summarized based on your specific interests.
-<img width="500" height=auto alt="image" src="https://github.com/user-attachments/assets/5a8cfc8a-2370-42da-9dd9-56c14edce1f9" />
+### 📰 Highlights
+The week's most important AI developments, ranked and summarized based on your specific interests.
 
-**Cross-source analysis** — stories that appeared across multiple independent sources are surfaced and synthesized, separating signal from noise.
-<img width="500" height=auto alt="image" src="https://github.com/user-attachments/assets/59d76825-b71b-4fe7-b9f2-4c240590747e" />
+<img width="600" alt="Highlights" src="https://github.com/user-attachments/assets/5a8cfc8a-2370-42da-9dd9-56c14edce1f9" />
 
+<br>
 
-**Action items** — concrete takeaways: tools to try, papers to read, trends to watch. Turns news into next steps.
-<img width="500" height=auto alt="image" src="https://github.com/user-attachments/assets/e0174059-f09b-499a-af56-54632143a732" />
+### 🔗 Cross-source analysis
+Stories that appeared across multiple independent sources are surfaced and synthesized, separating signal from noise.
+
+<img width="600" alt="Cross-source analysis" src="https://github.com/user-attachments/assets/59d76825-b71b-4fe7-b9f2-4c240590747e" />
+
+<br>
+
+### ✅ Action items
+Concrete takeaways: tools to try, papers to read, trends to watch. Turns news into next steps.
+
+<img width="600" alt="Action items" src="https://github.com/user-attachments/assets/e0174059-f09b-499a-af56-54632143a732" />
 
 ---
 
