@@ -23,6 +23,16 @@ Scrape 16 RSS feeds (OpenAI, Anthropic, DeepMind, Meta AI, Mistral…)
 
 ---
 
+## What's in each digest
+
+**Highlights** — the week's most important AI developments, ranked and summarized based on your specific interests.
+
+**Cross-source analysis** — stories that appeared across multiple independent sources are surfaced and synthesized, separating signal from noise.
+
+**Action items** — concrete takeaways: tools to try, papers to read, trends to watch. Turns news into next steps.
+
+---
+
 ## Technical highlights
 
 **RAG pipeline** — articles are embedded with `sentence-transformers/all-MiniLM-L6-v2` and stored in Supabase with pgvector. Retrieval uses cosine similarity weighted with recency and source diversity to avoid echo chambers.
