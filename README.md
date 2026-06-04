@@ -32,7 +32,7 @@ Visit the link above, enter your email, pick your interests, and you'll receive 
 |---|---|
 | Automation | GitHub Actions (free) |
 | Database | Supabase PostgreSQL + pgvector (free) |
-| Backend | FastAPI on Railway / Render (free tier) |
+| Backend | Comming Soon! Currently working locally |
 | LLM | Qwen 2.5 72B via HuggingFace Inference API |
 | Email | Gmail SMTP |
 
@@ -78,21 +78,10 @@ uv run uvicorn app.api.main:app --reload
 
 ---
 
-## Deploy the web UI (Railway or Render)
+## Deploy the web UI 
+Comming soon!
 
-So subscribers can sign up via the landing page at a public URL.
 
-**Railway:**
-1. [railway.app](https://railway.app) → New Project → Deploy from GitHub repo
-2. Add environment variables (same as GitHub secrets)
-3. Railway auto-detects the `Procfile` and deploys
-
-**Render:**
-1. [render.com](https://render.com) → New Web Service → connect repo
-2. Render reads `render.yaml` automatically
-3. Add environment variables in the Render dashboard
-
-Update the **Subscribe** link at the top of this README with your deployed URL.
 
 ---
 
