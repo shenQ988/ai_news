@@ -43,7 +43,7 @@ jobs:
         run: uv run python main.py 170
 
       - name: Generate and send digests to all active subscribers
-        run: uv run python main.py --digest-all --send
+        run: uv run python main.py --digest-all --digest-only --send
 
       - name: Upload digest preview on failure
         if: failure()
