@@ -40,7 +40,7 @@ jobs:
         run: uv run python scripts/seed_test_user.py
 
       - name: Scrape + embed articles
-        run: uv run python main.py 25
+        run: uv run python main.py 170
 
       - name: Generate and send digests to all active subscribers
         run: uv run python main.py --digest-all --send
