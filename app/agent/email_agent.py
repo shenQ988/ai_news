@@ -1,6 +1,6 @@
 import logging
+from typing import Optional
 
-from app.config import config
 from app.services.email_service import EmailService
 
 logger = logging.getLogger(__name__)
@@ -10,11 +10,8 @@ class EmailAgent:
     def __init__(self):
         self.service = EmailService()
 
-    def send(self, digest: dict) -> bool:
-        """
-        Take the digest produced by DigestAgent and send it to the configured recipient.
-        Logs a preview of the subject and section lengths before sending.
-        """
+    def send(self, digest: dict, to: Optional[str] = None) -> bool:
+        """Send the digest. Pass `to` to override the default EMAIL_TO recipient."""
         subject = digest.get("subject", "AI News Digest")
         sections = digest.get("sections", {})
         html = digest.get("html", "")
@@ -24,15 +21,14 @@ class EmailAgent:
             return False
 
         logger.info("Preparing email: '%s'", subject)
-        logger.info("Recipient: %s", config.email_to)
         for name, body in sections.items():
             logger.info("  Section '%s': %d chars", name, len(body))
 
-        success = self.service.send_digest(digest)
+        success = self.service.send_digest(digest, to=to)
 
         if success:
-            logger.info("Email delivered successfully to %s", config.email_to)
+            logger.info("Email delivered successfully")
         else:
-            logger.error("Email delivery failed — check SMTP credentials in .env")
+            logger.error("Email delivery failed — check SMTP credentials")
 
         return success

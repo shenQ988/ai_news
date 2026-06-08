@@ -90,6 +90,37 @@ app/
 
 ---
 
+## Deployment
+
+### GitHub Secrets required
+
+Add these in: **Repo → Settings → Secrets and variables → Actions**
+
+| Secret | Description | Where to get it |
+|---|---|---|
+| `DATABASE_URL` | Postgres connection string | Supabase → Connect → Transaction pooler |
+| `HUGGINGFACE_API_KEY` | For embeddings and LLM calls | huggingface.co/settings/tokens |
+| `GROQ_API_KEY` | For RAGAS evaluation (optional) | console.groq.com/keys |
+| `SMTP_USER` | Gmail address for sending | Your Gmail |
+| `SMTP_PASSWORD` | Gmail App Password (16 chars) | Google Account → Security → App passwords |
+| `EMAIL_FROM` | Sender address | Same as `SMTP_USER` |
+| `EMAIL_TO` | Default recipient | Your email |
+
+### Supabase setup
+
+Run once in the Supabase SQL editor:
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
+Tables are created automatically on first run.
+
+### Trigger a test run
+
+**Actions → Weekly AI News Digest → Run workflow**
+
+---
+
 ## Local setup
 
 ```bash
@@ -100,4 +131,4 @@ cp .env.example .env   # add your API keys
 uv run uvicorn app.api.main:app --reload   # http://localhost:8000
 ```
 
-See `.env.example` for required environment variables.
+See `.env.example` for all required environment variables.

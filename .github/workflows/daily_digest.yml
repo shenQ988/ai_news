@@ -13,11 +13,13 @@ jobs:
     env:
       DATABASE_URL:        ${{ secrets.DATABASE_URL }}
       HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
-      SMTP_HOST:           ${{ secrets.SMTP_HOST }}
-      SMTP_PORT:           ${{ secrets.SMTP_PORT }}
+      GROQ_API_KEY:        ${{ secrets.GROQ_API_KEY }}
+      SMTP_HOST:           smtp.gmail.com
+      SMTP_PORT:           587
       SMTP_USER:           ${{ secrets.SMTP_USER }}
       SMTP_PASSWORD:       ${{ secrets.SMTP_PASSWORD }}
       EMAIL_FROM:          ${{ secrets.EMAIL_FROM }}
+      EMAIL_TO:            ${{ secrets.EMAIL_TO }}
 
     steps:
       - name: Checkout
@@ -34,9 +36,11 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Seed subscriber if no users exist
+        run: uv run python scripts/seed_test_user.py
+
       - name: Scrape + embed articles
         run: uv run python main.py 25
-        # 25 h covers the full day plus a small overlap buffer
 
       - name: Generate and send digests to all active subscribers
         run: uv run python main.py --digest-all --send

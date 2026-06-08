@@ -165,12 +165,8 @@ def run_digest_all():
             agent = DigestAgent(user_profile=profile)
             digest = agent.generate_digest(result)
 
-            # Override recipient to profile email
-            import os as _os
-            _os.environ["EMAIL_TO"] = profile.email
-
             email_agent = EmailAgent()
-            success = email_agent.send(digest)
+            success = email_agent.send(digest, to=profile.email)
             print(f"  Sent: {'✓' if success else '✗ FAILED'}")
 
 
